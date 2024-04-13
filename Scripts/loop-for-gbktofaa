@@ -1,4 +1,8 @@
 #!/bin/bash
+
+#download assemblies from cblaster
+parallel -a regions.boundaries -C '\t' -j8 --delay 0.4 "efetch -db nuccore -id {1} -seq_start {2} -seq_stop {3} -format gbwithparts >{1}_{2}_{3}.gb"
+
 #convert gbk to fasta protein
 VAR4=$(echo *.gb | xargs ls)
 
@@ -7,4 +11,18 @@ for f in ${VAR4}
       python gbktofaa.py  ${f}
    done
 
+cat *.fasta >>  Zorya2.fa
+#filter to extract protein of interest
 
+python friday.py ZorA2.txt Zorya2.fa ZorA2-only-seqs.fas
+
+#edit with nano to change Zorya2 to any system, and ZorA2.txt to any list of proteins Id you want to test. ZorA2-only-seqs.fas is the output file 
+
+
+#cluster proteins to eliminate redundancy 
+mmseqs easy-linclust ZorB2-seqs.txt clusterReszorb2  tmp  -c 0.8 --min-seq-id 0.9 --threads 8
+
+#Split the headers to only keep Nuccore Id for concatenation
+##for mac use gawk
+###change zorb2_rep_seq.fasta to any filename obtained by MMseqs that contains only representative sequences filtered by Mmseqs
+gawk -F"_" '{print $1"_"$2}' zorb2_rep_seq.fasta    
