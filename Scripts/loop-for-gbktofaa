@@ -1,0 +1,10 @@
+#!/bin/bash
+#convert gbk to fasta protein
+VAR4=$(echo *.gb | xargs ls)
+
+for f in ${VAR4}
+   do
+      python gbktofaa.py  ${f}
+   done
+
+
